@@ -22,7 +22,10 @@ length.weight<-read.csv2("LW_pilot_sudan12_15.csv")
 
 #' Select 6 species for which specific LW data exists
 #' LW data also exists for "SERPL03" and 'SEREP73', but no specimens of this species was caught during the pilot survey
-study.species<-c("LUTLU06", "SEREP17", "SERPL07", "ACAAC28", "CARCA04", "CARCS04", "CARCS13", "CARSC01", "CARSC04", "CHRCH01", "GERGE02", "HOLSA03", "LETLE02", "LETLE05", "LETLE13", "LUTLU04", "LUTLU18", "LUTLU57", "SCMGY01", "SCMRA01", "SCMSM02", "SEREP07", "SEREP12", "SIGSI24","SPAAR01")
+#study.species<-c("LUTLU06", "SEREP17", "SERPL07", "ACAAC28", "CARCA04", "CARCS04", "CARCS13", "CARSC01", "CARSC04", "CHRCH01", "GERGE02", "HOLSA03", "LETLE02", "LETLE05", "LETLE13", "LUTLU04", "LUTLU18", "LUTLU57", "SCMGY01", "SCMRA01", "SCMSM02", "SEREP07", "SEREP12", "SIGSI24","SPAAR01")
+
+study.species<-c("LUTLU06", "LETLE02","LUTLU04","CARSC01","CARSC04","ACAAC28")
+                
 
 lw.select<-data.frame()
 
@@ -139,7 +142,7 @@ for (i in 1:length(study.species)){
   
   lo.points<-as.data.frame(cbind(l.fb, w.fb, w.lo, w.up))
   
-  lw.plot.1 <- lw.plot + geom_line(data=lo.points,  colour=lw.colours[1], aes(l.fb, w.fb))
+  lw.plot.1 <- lw.plot.1 + geom_line(data=lo.points,  colour=lw.colours[1], aes(l.fb, w.fb))
   #lw.plot.1
 
   #' testing out plot with geom_ribbon
@@ -150,11 +153,11 @@ for (i in 1:length(study.species)){
 
   
   #' adding L-W line from FishBase (RED line)
-  l.fb<-c(min(subset(lw.select, species==study.species[i])[5]):max(subset(lw.select, species==study.species[i])[5]))
-  w.fb<-species.list[grep(study.species[i], species.list[,3]),5] * l.fb^species.list[grep(study.species[i], species.list[,3]),6] 
-  fb.points<-as.data.frame(cbind(l.fb, w.fb))
+ # l.fb<-c(min(subset(lw.select, species==study.species[i])[5]):max(subset(lw.select, species==study.species[i])[5]))
+  #w.fb<-species.list[grep(study.species[i], species.list[,3]),5] * l.fb^species.list[grep(study.species[i], species.list[,3]),6] 
+ # fb.points<-as.data.frame(cbind(l.fb, w.fb))
   
-  lw.plot.1 <- lw.plot.1 + geom_line(data=fb.points,  colour=lw.colours[2], aes(l.fb, w.fb))
+#  lw.plot.1 <- lw.plot.1 + geom_line(data=fb.points,  colour=lw.colours[2], aes(l.fb, w.fb))
   
   #' adding loca growth curves
   #' Northern Area growth curve (BLUE line)
@@ -182,4 +185,9 @@ lw.plotlist<-list(ACAAC28.plot, CARCA04.plot, CARCS04.plot, CARCS13.plot, CARSC0
 
 multiplot(ACAAC28.plot, CARCA04.plot, CARCS04.plot, CARCS13.plot, CARSC01.plot, CARSC04.plot, CHRCH01.plot, GERGE02.plot, HOLSA03.plot, LETLE02.plot, LETLE05.plot, LETLE13.plot, LUTLU04.plot, LUTLU06.plot, LUTLU18.plot, LUTLU57.plot, SCMGY01.plot, SCMRA01.plot, SCMSM02.plot, SEREP07.plot, SEREP12.plot, SEREP17.plot, SERPL07.plot, SIGSI24.plot, SPAAR01.plot, layout=lw.layout)
 
+#' multiplot for species with more than 40 obs (6 species)
+#' 
+lw.layout<-matrix(1:6, nrow=3, byrow=TRUE)
+lw.plotlist<-list(LUTLU06.plot, LETLE02.plot, LUTLU04.plot, CARSC01.plot, CARSC04.plot, ACAAC28.plot)
 
+multiplot(LUTLU06.plot, LETLE02.plot, LUTLU04.plot, CARSC01.plot, CARSC04.plot, ACAAC28.plot, layout=lw.layout)
