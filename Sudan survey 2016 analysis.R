@@ -75,18 +75,19 @@ stationmap
 
 #'adding place names
 stationnames<-read.csv2("stations place names.csv")
+stationnames <- subset(stationnames, AreaName != "Port Sudan")
 stationmap <- stationmap + geom_point(data=stationnames, shape="#", size=6, colour="red2", aes(x=LON, y=LAT, group=Area.No)) + geom_text(data=stationnames, label=stationnames$AreaName, size=4,  hjust=1.15,  aes(x=LON, y=LAT, group=Area.No)) 
 stationmap
 
 #' reefmap
-reefmap <- ggplot(world, aes(x=long, y=lat, group=group)) + geom_polygon(colour="gray35", fill="gray85") + geom_point(data=stationnames, size=3, aes(x=LON, y=LAT, group=Area.No, colour=as.factor(Part))) + geom_text(data=stationnames, label=stationnames$AreaName, size=2,  hjust=1.15,  aes(x=LON, y=LAT, group=Area.No)) + theme_classic() + scale_color_brewer(palette = "Set1", name="Survey parts") + scale_shape_discrete()
+reefmap <- ggplot(world, aes(x=long, y=lat, group=group)) + geom_polygon(colour="gray35", fill="gray85") + geom_point(data=stationnames, size=3, aes(x=LON, y=LAT, group=Area.No, colour=as.factor(Part))) + geom_text(data=stationnames, label=stationnames$AreaName, size=2,  hjust=1.15,  aes(x=LON, y=LAT, group=Area.No)) + theme_classic() + scale_color_brewer(palette = "Set1", name="Survey parts") + scale_shape_discrete() + geom_point(data=ps, size=3, colour="gray35", aes(x=x, y=y)) + geom_text(data=ps, label="Port Sudan", size=3,  hjust=1.15,  aes(x=x, y=y, group=group)) +  coord_cartesian(xlim = c(36, 38.9), ylim=c(17.7, 22.5)) 
 
 #' reefmap whole sudan
 reefmap +  coord_cartesian(xlim = c(36, 38.9), ylim=c(17.7, 22.5)) 
 ggsave("reefmap_all.png", width=4.3, height=6)
 
 #' southern area only
-reefmap +  coord_cartesian(xlim = c(36.6, 38.9), ylim=c(17.7, 19.5))
+reefmap +  coord_cartesian(xlim = c(36.6, 38.9), ylim=c(18.0, 19.7))
 ggsave("reefmap_south.png", width=5, height=5)
 
 
