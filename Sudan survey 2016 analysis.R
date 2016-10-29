@@ -20,8 +20,8 @@ biology<-read.delim("Hl and TRAPS/red sea 2016002 data export.txt")
 #ctd<-read.csv2("CTD/CTD2015.csv")
 
 #' selecting columns for stations and biology & adding positions to biology
-bc<-c(2,3,4,5,6,8,10,11,12,13,14,15,18,20,21,23)
-sc<-c(2,3,5,7,10,11,12,13,14,15,16, 17, 18)
+bc<-c(2,3,4,5,6,8,10,11,12,13,14,15,17,19,20,21)
+sc<-c(2,3,5,7,10,11,12,13,14,15,16, 17)
 bc<-biology[,bc]
 sc<-stations[,sc]
 bc$Station<-bc$SurvStat
@@ -30,13 +30,13 @@ colnames(bc)[6]<-c("duration")
 colnames(bc)[8]<-c("length")
 colnames(bc)[11]<-c("gonads")
 
-sc$Station.Id<-sc$Stat_Unique
+sc$Station.Id<-sc$Stat_Unique..Key
 colnames(sc)[1]<-c("Station")
 colnames(sc)[6]<-c("depth")
 colnames(sc)[7]<-c("date_start")
 colnames(sc)[9]<-c("time_start")
 colnames(sc)[10]<-c("time_stop")
-colnames(sc)[13]<-c("date_stop")
+colnames(sc)[12]<-c("date_stop")
 
 
 #' combining stations file and BRUV + UVC for a complete station list. 
@@ -62,7 +62,7 @@ for (i in 1:length(bc$lat))
   bc$name[i]<- as.character(subset(sc, Station==bc$Station[i])[,2])
 }
 
-write.csv2(biology, "survey_2016002_biology_corr_name_pos_effort_soak.csv")
+write.csv2(bc, "survey_2016002_biology_corr_name_pos_effort_soak.csv")
 
 #' MAPPING ALL DATA
 #' --------------------
@@ -83,7 +83,7 @@ stationmap
 reefmap <- ggplot(world, aes(x=long, y=lat, group=group)) + geom_polygon(colour="gray35", fill="gray85") + geom_point(data=stationnames, size=3, aes(x=LON, y=LAT, group=Area.No, colour=as.factor(Part))) + geom_text(data=stationnames, label=stationnames$AreaName, size=2,  hjust=1.15,  aes(x=LON, y=LAT, group=Area.No)) + theme_classic() + scale_color_brewer(palette = "Set1", name="Survey parts") + scale_shape_discrete() + geom_point(data=ps, size=3, colour="gray35", aes(x=x, y=y)) + geom_text(data=ps, label="Port Sudan", size=3,  hjust=1.15,  aes(x=x, y=y, group=group)) +  coord_cartesian(xlim = c(36, 38.9), ylim=c(17.7, 22.5)) 
 
 #' reefmap whole sudan
-reefmap +  coord_cartesian(xlim = c(36, 38.9), ylim=c(17.7, 22.5)) 
+reefmap +  coord_cartesian(xlim = c(36, 38.9), ylim=c(17.7, 22)) 
 ggsave("reefmap_all.png", width=4.3, height=6)
 
 #' southern area only
@@ -101,4 +101,19 @@ survey16map
 lwplot <- ggplot(bc, aes(x=length, y=weight, group=Species)) + geom_point(colour="steelblue") + facet_wrap(~Species, scale ="free")
 lwplot
 
-# some errors need to be corrected
+# some errors need to be corrected 29.10:
+# HOLMY02, HOLSA05, LUTLU06, LUTLU18, SERVA01, MURGY13
+
+#' CHECK OF DATA
+#' 
+#' Duration
+hist(bc$duration/60)
+summary(bc$duration/60)
+
+#' duration histogram by gear
+durationplot<-ggplot(bc, aes(x=duration/60, group=Gear)) + geom_histogram(binwidth = 1, aes(fill=Gear)) + theme_bw() +facet_wrap(~Gear, scales = "free_y") + scale_fill_brewer(palette = "Set1") + xlab("Duration (hours)")
+durationplot
+
+#' depth histogram by gear
+depthplot<-ggplot(sc, aes(x=depth, group=Gear)) + geom_histogram(binwidth = 5, aes(fill=Gear)) + theme_bw() +facet_wrap(~Gear, scales = "free_y") + scale_fill_brewer(palette = "Set1") + xlab("Depth (m)")
+depthplot
