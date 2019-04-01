@@ -15,7 +15,7 @@ source('~/AtlantisNEUS_R/multiplot function.R', encoding='UTF-8')
 
 #' IMPORT DATA
 #' -----------------------------
-setwd("~/ownCloud/Research/Sudan/Length_Weight paper")
+setwd("~/ownCloud/Research/Sudan/Length_Weight paper/data")
 
 species.list<-read.csv2("Species_table.csv")
 length.weight<-read.csv2("LW_pilot_sudan12_15.csv")
@@ -190,4 +190,7 @@ multiplot(ACAAC28.plot, CARCA04.plot, CARCS04.plot, CARCS13.plot, CARSC01.plot, 
 lw.layout<-matrix(1:6, nrow=3, byrow=TRUE)
 lw.plotlist<-list(LUTLU06.plot, LETLE02.plot, LUTLU04.plot, CARSC01.plot, CARSC04.plot, ACAAC28.plot)
 
+tiff(file="fig 9 LWplot.tiff", width=1900, height=1900, res=400, pointsize=8, compression=c("none"))
+
 multiplot(LUTLU06.plot, LETLE02.plot, LUTLU04.plot, CARSC01.plot, CARSC04.plot, ACAAC28.plot, layout=lw.layout)
+dev.off()

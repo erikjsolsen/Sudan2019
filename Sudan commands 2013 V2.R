@@ -18,10 +18,10 @@ library(RColorBrewer)
 library(plyr)
 library(ggplot2)
 
-source("/Users/eriko/Documents/G-copy/R/R functions/suncalc.r") #function to calculate  sunrise/sunset
+source("/Users/eriko/ownCloud/R/R functions/suncalc.r") #function to calculate  sunrise/sunset
 #Set working directory
 #Must be changed to according to your own directories
-setwd("/Users/eriko/Documents/G-copy/research/Sudan/All_data")
+setwd("/Users/eriko/ownCloud/Research/Sudan/SurveyProj2012_14/All_data")
 
 
 
@@ -69,9 +69,16 @@ station<-cbind(catch2, catch1[,2:3]) # comnbine the two catch tables
 # Stations Exploratory statistical analysis
 summary(station)
 station13<-(subset(station, survey==2013002))
-by(station13[9], station13[7], summary) #summary catchweight by gear type
+by(station[9], station[7], summary) #summary catchweight by gear type
 by(station[9], station[2], summary) #summary of weight by survey
 by(station[10], station[2], summary) #summary of weight by survey
+
+by(catch[14],catch[4], summary)
+
+no_nocatch<-subset(station, number!=0)
+# used to generate table 1 in MS:
+by(no_nocatch$gear, no_nocatch$survey, summary)
+by(station$gear, station$survey, summary)
 
 summary(station $ gear)
 
@@ -80,6 +87,14 @@ summary(subset(station, survey==2012901)) #for 2012
 summary(subset(station, survey==2013002))  #for May/June 2013
 summary(subset(station, survey==2013005))  #for Nov 2013
 
+
+#---------------------
+# IMPORT STATION TABLE DIRECTLY
+#---------------------
+station2<-read.table("stations.csv", header=TRUE, dec=",",sep=";")
+traps<-subset(station2, gear=="TB")
+traps<-subset(traps, geardepthstart>0)
+summary(traps)
 
 #-------------------------------------
 # COMPARISON OF CATCHES PR STATION

@@ -1,0 +1,148 @@
+no;x1;x2;MaxLength;Trophic Level;Trophic group;Water column;Diel Activity;Habitat;Gregariousness;comments;Eo Comments
+1;Abudefduf sordidus;Abudefduf sordidus;23;2,8;Planktivore;Demersal;Day;coral;3;no comment;no comment
+2;Acanthopagrus berda;Acanthopagrus berda;90;3,5;Benthic invertivore;Demersal;#N/A;#N/A;#N/A;no comment;fishBase
+3;Acanthurus nigricans;Acanthurus nigricans;21,3;2;Browsing herbivore;Demersal;Day;coral;1;no comment;no comment
+4;Acanthurus nigricauda;Acanthurus nigricauda;40;3;Browsing herbivore;Demersal;Day;coral;1;no comment;no comment
+5;Acanthurus sohal;Acanthurus sohal;40;2;Browsing herbivore;Demersal;Day;coral;1;no comment;no comment
+7;Adioryx ruber;Sargocentron rubrum;32;3,5;Benthic invertivore;Demersal;Night;coral;2;Genus changed;no comment
+8;Adioryx spinifer;Sargocentron spiniferum;51;3,5;Benthic invertivore;Demersal;Night;coral;1;Genus changed;no comment
+9;Aethaloperca rogaa;Aethaloperca rogaa;60;4,2;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+11;Albula glossodonta;Albula glossodonta;90;3,3;Benthic invertivore;Demersal;Day;Sand;2;no comment;no comment
+12;Albula vulpes;Albula vulpes;104;0;Benthic invertivore;benthic;Day;Sand;2;no comment;no comment
+13;Alectis indicus;Alectis indicus;165;0;Higher carnivore;benthic;Day;rock;2;no comment;no comment
+14;Alepes vari;Alepes vari;56;3,7;Higher carnivore;pelagic non-site attached;Day;Sand;3;no comment;no comment
+15;Argyrops filamentosus;Argyrops filamentosus;70;3,5;Benthic invertivore;Demersal;#N/A;#N/A;#N/A;no comment;fishBase
+16;Argyrops sp.;Argyrops sp.;70;4;Benthic invertivore;Demersal;#N/A;#N/A;#N/A;no comment;average
+17;Argyrops spinifer;Argyrops spinifer;70;4,5;Benthic invertivore;Demersal;#N/A;#N/A;#N/A;no comment;FishBase
+18;Arius heudelotii;Arius heudelotii;83;3,8;Benthic invertivore;Demersal;#N/A;#N/A;#N/A;no comment;FishBase
+19;Arius thalassinus;Arius thalassinus;185;3,5;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;FishBase
+20;Auxis thazard;Auxis thazard;65;4,4;Higher carnivore;pelagic non-site attached;Day;Sand;3;no comment;no comment
+21;Balistapus undulatus;Balistapus undulatus;30;3,4;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+22;Balistoides viridescens;Balistoides viridescens;75;3,3;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+23;Bothus pantherinus;Bothus pantherinus;39;3,5;Higher carnivore;benthic;Day;coral;1;no comment;no comment
+24;Caesio caerulaurea;Caesio caerulaurea;35;3,4;Planktivore;pelagic site attached;Day;coral;3;no comment;no comment
+25;Caesio suevicus;Caesio suevica;35;3,4;Planktivore;pelagic site attached;Day;coral;3;no comment;no comment
+26;Carangoides armatus;Carangoides armatus;58;4,2;Higher carnivore;Demersal;Day;Sand;2;no comment;no comment
+27;Carangoides bajad;Carangoides bajad;55;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+28;Carangoides ferdau;Carangoides ferdau;70;4,5;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+29;Carangoides fulvoguttatus;Carangoides fulvoguttatus;120;4,4;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+30;Carangoides sp.;Carangoides sp.;75,75;4,4;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;average
+31;Caranx (Caranx) melampygus;Caranx melampygus;117;4,5;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+32;Caranx (Caranx) sexfasciatus;Caranx sexfasciatus;120;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+33;Caranx (Gnathanodon) speciosus;Gnathanodon speciosus;120;3,8;Benthic invertivore;demersal;Day;coral;3;no comment;no comment
+34;Caranx ignobilis;Caranx ignobilis;170;4,2;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+35;Caranx sp.;Caranx sp.;131,75;4,25;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;average
+36;Carcharhinus albimarginatus;Carcharhinus albimarginatus;300;4,2;Higher carnivore;pelagic non-site attached;Day;coral;1;no comment;no comment
+37;Carcharhinus melanopterus;Carcharhinus melanopterus;200;3,9;Higher carnivore;pelagic non-site attached;Day;coral;1;no comment;no comment
+38;Carcharhinus wheeleri;Carcharhinus wheeleri;170;4,5;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;species-identification.org
+39;Cephalopholis argus;Cephalopholis argus;60;4,5;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+40;Cephalopholis miniatus ?;Cephalopholis miniata;45;4,4;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+41;Cephalopholis oligosticta;Cephalopholis oligosticta;30;4,1;Higher carnivore;Demersal;#N/A;coral;#N/A;no comment;fishbase
+42;Cephalopholus sexmaculata;Cephalopholis sexmaculata;50;4,5;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+43;Chaetodon auriga;Chaetodon auriga;23;3,2;Corallivore;Demersal;Day;coral;2;no comment;no comment
+44;Chaetodon semilarvatus;Chaetodon semilarvatus;23;3,5;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
+45;Chanos chanos;Chanos chanos;180;2;Browsing herbivore;pelagic non-site attached;Day;sand;2;no comment;no comment
+46;Cheilinus lunulatus;Cheilinus lunulatus;50;3,6;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+47;Cheilinus quinquecintus;Cheilinus fasciatus;40;3,4;Benthic invertivore;Demersal;Day;coral;1;Cheilinus quinquecinctus has been grouped back in as C. fasciatus;no comment
+48;Chirocentrus dorab;Chirocentrus dorab;100;4,4;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+49;Chorinemus lysan;Scomberoides lysan;110;4,5;Higher carnivore;pelagic non-site attached;Day;coral;2;Genus changed;no comment
+50;Cociella crocodila;Cociella crocodilus;50;3,9;Higher carnivore;Benthic;#N/A;#N/A;#N/A;no comment;fishbase & Google
+51;Crenimugil crenilabis;Crenimugil crenilabis;60;2,3;Browsing herbivore;pelagic site attached;Day;sand;3;no comment;no comment
+52;Decapterus macarellus;Decapterus macarellus;46;3,4;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+53;Decapterus russelli;Decapterus russelli;45;3,7;Planktivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;fishbase
+54;Diagramma pictum;Diagramma pictum;90;3,6;Benthic invertivore;Demersal;Night;coral;1;no comment;no comment
+55;Diodon hystrix;Diodon hystrix;91;3,4;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+56;Echeneis naucrates;Echeneis naucrates;110;3,4;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+57;Elagatis bipinnulata;Elagatis bipinnulata;180;3,6;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+58;Epinephelus chlorostigma;Epinephelus chlorostigma;80;4;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
+59;Epinephelus fuscoguttatus;Epinephelus fuscoguttatus;120;4,1;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+60;Epinephelus microdon;Epinephelus polyphekadion;90;3,9;Higher carnivore;Demersal;Day;coral;1;changed;no comment
+61;Epinephelus sexfasciatus;Epinephelus sexfasciatus;40;3,8;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;no comment
+62;Epinephelus summana;Epinephelus summana;52;3,8;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;no comment
+63;Epinephelus tauvina;Epinephelus tauvina;75;4,1;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+64;Euthynnus affinis;Euthynnus affinis;100;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+66;Gerres oyena;Gerres oyena;30;2,7;Benthic invertivore;demersal;#N/A;#N/A;#N/A;no comment;no comment
+67;Grammatorcynus bicarinatus;Grammatorcynus bicarinatus;112;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+68;Grammatorcynus bilineatus;Grammatorcynus bilineatus;100;4,2;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+69;Gymnocranius grandoculis;Gymnocranius grandoculis;80;3,8;Benthic invertivore;Demersal;Day;sand;1;no comment;no comment
+70;Gymnocranius microdon;Gymnocranius microdon;45;3,4;Benthic invertivore;Demersal;Day;sand;1;no comment;no comment
+71;Gymnocranius robinsoni;Gymnocranius grandoculis;80;3,8;Benthic invertivore;Demersal;Day;sand;1;now G. grandoculis;no comment
+72;Gymnosarda unicolor;Gymnosarda unicolor;248;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+73;Gymnothorax flavimarginatus;Gymnothorax flavimarginatus;240;4,2;Benthic invertivore;benthic;Night;coral;1;no comment;no comment
+74;Gymnothorax javanicus;Gymnothorax javanicus;300;3,9;Benthic invertivore;benthic;Night;coral;1;no comment;no comment
+76;Hemiramphus far;Hemiramphus far;45;0;Planktivore;benthic;Day;Sand;3;no comment;no comment
+77;Hipposcarus harid;Hipposcarus harid;75;2;Scraping herbivore;Demersal;Day;coral;3;no comment;no comment
+78;Katsuwonus pelamis;Katsuwonus pelamis;110;4,4;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;fishbase
+79;Kyphosus vaigiensis;Kyphosus vaigiensis;70;2;Browsing herbivore;pelagic site attached;Day;coral;3;no comment;no comment
+81;Lethrinus elongatus *;Lethrinus microdon;80;3,8;Benthic invertivore;Demersal;Day;coral;1;changed;no comment
+82;Lethrinus harak;Lethrinus harak;50;3,6;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+83;Lethrinus lentjan;Lethrinus lentjan;52;4,2;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+84;Lethrinus mahsena;Lethrinus mahsena;65;3,4;Benthic invertivore;Demersal;Day;coral;0;no comment;no comment
+85;Lethrinus mahsenoides *;Lethrinus lentjan;52;4,2;Higher carnivore;Demersal;Day;coral;1;changed;no comment
+86;Lethrinus nebulosus;Lethrinus nebulosus;87;3,3;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+87;Lethrinus ramak;Lethrinus obsoletus;60;3,4;Benthic invertivore;Demersal;Day;coral;1;changed;no comment
+88;Lethrinus xanthochilus;Lethrinus xanthochilus;70;3,7;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+89;Lutjanus argentimaculatus;Lutjanus argentimaculatus;150;3,6;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+90;Lutjanus bohar;Lutjanus bohar;90;4,1;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+91;Lutjanus cf  fluviflamma;Lutjanus fulviflamma;35;3,8;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+92;Lutjanus coccineus *;Lutjanus gibbus;50;3,6;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+93;Lutjanus ehrenbergii;Lutjanus ehrenbergii;35;4,4;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+94;Lutjanus fulviflamma;Lutjanus fulviflamma;35;3,8;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+95;Lutjanus gibbus;Lutjanus gibbus;50;3,6;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+96;Lutjanus kasmira;Lutjanus kasmira;40;3,6;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
+97;Lutjanus malabaricus;Lutjanus malabaricus;100;4,5;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
+98;Lutjanus monostigma;Lutjanus monostigma;60;4,3;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+99;Lutjanus rivulatus;Lutjanus rivulatus;80;4,1;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+100;Lutjanus sebae;Lutjanus sebae;116;4,3;Higher carnivore;Demersal;Day;coral;2;no comment;no comment
+101;Lutjanus sp.;Lutjanus sp.;70,08333333;3,975;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;average
+102;Macolor niger;Macolor niger;75;3,995744681;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
+103;Monotaxis grandoculis;Monotaxis grandoculis;60;3,2;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
+104;Mugil bananensis;Mugil bananensis;40;2,8;Planktivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;fishbase
+105;Mulloides flavolineatus;Mulloidichthys flavolineatus;43;3,3;Benthic invertivore;Demersal;Day;sand;3;name;no comment
+106;Mulloides vanicolensis;Mulloidichthys vanicolensis;38;3,6;Benthic invertivore;Demersal;Day;sand;3;name;no comment
+107;Myripristis murdjan;Myripristis murdjan;60;3,3;Planktivore;Demersal;Night;coral;2;no comment;no comment
+108;Naso hexacanthus;Naso hexacanthus;75;3,3;Planktivore;Demersal;Day;coral;3;no comment;no comment
+109;Naso lituratus;Naso lituratus;46;2,3;Browsing herbivore;Demersal;Day;coral;1;no comment;no comment
+112;Paracaesio sordius;Paracaesio sordida;48;2,8;Planktivore;pelagic site attached;Day;coral;3;name;no comment
+113;Platax boersi;Platax boersii;57,5;3,55;Benthic invertivore;pelagic site attached;Day;Coral;2;name;no comment
+114;Platax orbicularis;Platax orbicularis;50;3,3;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
+115;Plectorhinchus gaterinus;Plectorhinchus gaterinus;50;40;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
+116;Plectorhinchus pictus;Plectorhinchus picus;84;3,9;Benthic invertivore;Demersal;Night;coral;1;Have done as though you mean P. picus, but P. pictus is otherwise now Diagramma pictus;no comment
+117;Plectorhynchus pictus;Plectorhinchus picus;84;3,9;Benthic invertivore;Demersal;Night;coral;1;Have done as though you mean P. picus, but P. pictus is otherwise now Diagramma pictus;no comment
+118;Plectorhynchus schotaf;Plectorhinchus schotaf;80;3,8;Benthic invertivore;Demersal;Night;Coral;1;no comment;no comment
+119;Plectropomus pessuliferus;Plectropomus pessuliferus;120;4,3;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
+120;Priacanthus hamrur;Priacanthus hamrur;45;3,6;Benthic invertivore;Demersal;Night;coral;2;no comment;no comment
+121;Pristipomoides multidens;Pristipomoides multidens;90;3,8;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
+122;Pseudobalistes flavimarginatus;Pseudobalistes flavimarginatus;60;3,4;Benthic invertivore;Demersal;Day;coral;1;no comment;no comment
+123;Rastrelliger kanagurta;Rastrelliger kanagurta;35;3,2;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+124;Sarda orientalis;Sarda orientalis;102;4,2;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+125;Sargocentron spiniferum;Sargocentron spiniferum;51;3,5;Benthic invertivore;Demersal;Night;coral;1;no comment;no comment
+126;Scarus ferrugineus;Scarus ferrugineus;41;2;Scraping herbivore;Demersal;Day;coral;2;no comment;no comment
+127;Scarus frenatus;Scarus frenatus;47;2;Scraping herbivore;Demersal;Day;coral;2;no comment;no comment
+128;Scarus ghobban;Scarus ghobban;90;2;Scraping herbivore;Demersal;Day;coral;2;no comment;no comment
+129;Scomber japonicus;Scomber japonicus;64;3,4;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+130;Scomberoides lysan;Scomberoides lysan;110;4,5;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+131;Scomberoides tol;Scomberoides tol;110;4,5;Higher carnivore;pelagic non-site attached;Day;Coral;2;no comment;no comment
+132;Scomberomorus commerson;Scomberomorus commerson;240;4,5;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+133;Scomberomorus lineolatus;Scomberomorus lineolatus;94;4,5;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+134;Scomberomorus tritor;Scomberomorus tritor;100;4,3;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+135;Siganus argenteus;Siganus argenteus;40;2;Browsing herbivore;Demersal;Day;coral;2;no comment;no comment
+136;Siganus luridus;Siganus luridus;30;2;Browsing herbivore;Demersal;Day;coral;2;no comment;no comment
+137;Siganus rivulatus;Siganus rivulatus;27;0;Browsing herbivore;benthic;Day;rock;2;no comment;no comment
+138;Siganus stellatus;Siganus stellatus;40;2,7;Browsing herbivore;Demersal;Day;coral;2;no comment;no comment
+140;Sphyraena forsteri;Sphyraena forsteri;75;4,3;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+141;Sphyraena jello;Sphyraena jello;150;4,5;Higher carnivore;pelagic non-site attached;Day;coral;0;no comment;no comment
+142;Sphyraena putnamie;Sphyraena putnamae;90;4,5;Higher carnivore;pelagic non-site attached;Day;rock;3;name;no comment
+143;Sphyraena qenie;Sphyraena qenie;170;4,5;Higher carnivore;pelagic non-site attached;Day;coral;3;no comment;no comment
+144;Sphyrna lewini;Sphyrna lewini;430;4,1;Higher carnivore;pelagic non-site attached;Day;coral;2;no comment;no comment
+145;Taeniura lymma;Taeniura lymma;35;3,6;Benthic invertivore;benthic;Day;sand;1;no comment;no comment
+146;Terapon jarbua;Terapon jarbua;36;3,9;Benthic invertivore;Demersal;Day;Sand;2;no comment;no comment
+147;Thunnus albacares;Thunnus albacares;239;4,3;Higher carnivore;pelagic non-site attached;Day;coral;0;no comment;no comment
+148;Triaenodon obesus;Triaenodon obesus;213;4,2;Higher carnivore;pelagic non-site attached;Day;coral;1;no comment;no comment
+149;Tylosurus acus rafale;Tylosurus acus rafale;140;4,1;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+150;Tylosurus choram;Tylosurus choram;120;4,4;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+151;Tylosurus crocodilus crocodil.;Tylosurus crocodilus;150;4,266666667;Higher carnivore;pelagic non-site attached;Day;sand;2;no comment;no comment
+152;Tylosurus crocodilus fodiator;Tylosurus crocodilus fodiator;134;4,5;Higher carnivore;pelagic non-site attached;#N/A;#N/A;#N/A;no comment;no comment
+153;Valamugil engeli;Osteomugil engeli;47,7;2,1;Benthic invertivore;pelagic site attached;#N/A;#N/A;#N/A;no comment;no comment
+154;Valamugil seheli;Osteomugil engeli;47,7;2,1;Benthic invertivore;pelagic site attached;#N/A;#N/A;#N/A;no comment;no comment
+155;Variola louti;Variola louti;83;4,3;Higher carnivore;Demersal;Day;coral;1;no comment;no comment
