@@ -106,7 +106,7 @@ no;x1;x2;MaxLength;Trophic Level;Trophic group;Water column;Diel Activity;Habita
 112;Paracaesio sordius;Paracaesio sordida;48;2,8;Planktivore;pelagic site attached;Day;coral;3;name;no comment
 113;Platax boersi;Platax boersii;57,5;3,55;Benthic invertivore;pelagic site attached;Day;Coral;2;name;no comment
 114;Platax orbicularis;Platax orbicularis;50;3,3;Benthic invertivore;Demersal;Day;coral;2;no comment;no comment
-115;Plectorhinchus gaterinus;Plectorhinchus gaterinus;50;40;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
+115;Plectorhinchus gaterinus;Plectorhinchus gaterinus;50;4;Higher carnivore;Demersal;#N/A;#N/A;#N/A;no comment;fishbase
 116;Plectorhinchus pictus;Plectorhinchus picus;84;3,9;Benthic invertivore;Demersal;Night;coral;1;Have done as though you mean P. picus, but P. pictus is otherwise now Diagramma pictus;no comment
 117;Plectorhynchus pictus;Plectorhinchus picus;84;3,9;Benthic invertivore;Demersal;Night;coral;1;Have done as though you mean P. picus, but P. pictus is otherwise now Diagramma pictus;no comment
 118;Plectorhynchus schotaf;Plectorhinchus schotaf;80;3,8;Benthic invertivore;Demersal;Night;Coral;1;no comment;no comment
