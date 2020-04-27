@@ -1,7 +1,7 @@
 ---
 title: "Sudan_catch_analysis"
 author: "Erik Olsen"
-date: "8/18/2019"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
 output:
   html_document: default
   pdf_document: default
@@ -42,6 +42,8 @@ library(rgeos)
 library(plyr) 
 library(dplyr)
 library(tidyr)
+library(knitr)
+library(kableExtra)
 library(maptools)
 library(marmap)
 library(classInt)
@@ -50,6 +52,7 @@ library("formattable")
 library("PMCMR")
 library(FD)
 library("gamlss", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
+library(patchwork)
 ```
 
 
@@ -145,11 +148,15 @@ naarea$name[9:16] <- c("Donganab")
 catch<- rbind(subset(catch, id>=1), naarea) 
 
 #' Change family names to Upper & Lower case
-catch$FamGroup2 <- paste(toupper(substr(catch$FamGroup, 1, 1)), tolower(substr(catch$FamGroup, 2, 20)), sep="")
-catch$FamGroup2 <- as.factor(catch$FamGroup2)
+#catch$FamGroup2 <- paste(toupper(substr(catch$FamGroup, 1, 1)), tolower(substr(catch$FamGroup, 2, 20)), sep="")
+#catch$FamGroup2 <- as.factor(catch$FamGroup2)
 ```
 
-### Modifying dataset and creating subset for stations with catches
+
+
+
+### Modifying dataset and creating one dataset for CPUE analysis and another for traits
+Of the catch data, 12 fish registrations lack weight, (i.e. this was forgotten entered into the database during the survey). These registrations, would if included lead to 12 more registrations of CPUE = 0. 
 ```{r nocatch dataset, echo=FALSE}
 #' Keep a copy of original 'catch'
 catch.unmod <- catch
@@ -158,12 +165,13 @@ catch.unmod <- catch
 # hist((subset(catch, gear=="HL" & Fhrs>0))$Fhrs, breaks =20) # get an idea of the spread in fishing time
 catch <- rbind(subset(catch, gear!="HL"), subset(catch, gear=="HL" & Fhrs>1 & Fhrs<8))
 
+#' remove 14 records where weight of fish has not been recorded
+names <- row.names(subset(catch, weight==0 & number>0))
+catch.cpue <- subset(catch, !(rownames(catch) %in% names))
+
+
 #' selecting only stations with catch & removes stations shorter than 1 hour - two handline stations with fishing time recorded as 5min, that we know is wrong, but we don't have the correct time. 
 catch1<-subset(catch, Sci_name!="No catch" & Sci_name!="NO CATCH") 
-
-#' reordering the species groups
-fam.names<-c("ACANTHURIDAE", "CARANGIDAE", "CARCHARHINIDAE", "CHIROCENTRIDAE", "LETHRINIDAE", "LUTJANIDAE", "SCOMBRIDAE",     "SERRANIDAE", "OTHER SPP" )  
-levels(catch1$FamGroup)<-fam.names
 
 ```
 
@@ -199,9 +207,9 @@ catch.traits <- subset(catch.traits, gear=="HL" | gear=="TB" | gear=="GN")
 catch.traits$ss1 <- as.factor(catch.traits$ss)
 
 #' add number of stations in that area to each line
-c3 <- catch.traits %>% group_by(ss1) %>% summarise( first(depth), first(gear), first(id), first(survey), first(survey_m))
+c3 <- catch.traits %>% dplyr::group_by(ss1) %>% dplyr::summarise( first(depth), first(gear), first(id), first(survey), first(survey_m))
 colnames(c3) <- c("ss", "depth", "gear", "id", "survey", "survey_m")
-n.area <- c3 %>% group_by(id) %>% summarise(n_distinct(ss))
+n.area <- c3 %>% dplyr::group_by(id) %>% dplyr::summarise(n_distinct(ss))
 colnames(n.area) <- c("id", "nos")
 
 catch.traits$NArea <- n.area$nos[match(catch.traits$id, n.area$id)]
@@ -277,7 +285,7 @@ ggsave("./figs/station_map.tiff")
 ## Station information
 ### Station table
 Table describing the sampling effort in each area pr survey, number of different gear types, max, min and average depth, number of traps with / without catches. 
-```{r station table}
+```{r station table, echo=FALSE}
 #' TABLE OF SAMPLING EFFORT PR. MANAGEMENT AREA
 #' (new for resubmission to PlosOne)
 #' --------------------------------------------
@@ -316,16 +324,51 @@ formattable(ay_info)
 write.csv2(ay_info, "./figs/Area_Station_table.csv")
 ```
 
+#### Species table
+Number of fish (organized by family and species) caught by Gillnet or Traps for each survey, and in total across all surveys and gears. 
+
+* (new table for revision 2020) *
+```{r species tabel, echo=FALSE}
+
+species.table <- subset(catch, Sci_name!="NO CATCH" & Sci_name!="No catch" & gear=="TB" | gear =="GN") %>% dplyr::group_by(Fam_name, Sci_name, survey, gear) %>% dplyr::summarise(No.individ=sum(as.integer(number)))
+
+species.table <- spread(species.table, gear, No.individ)
+
+spt <- species.table[,2:5] %>%
+  gather(variable, value, -(Sci_name:survey)) %>%
+  unite(temp, survey, variable) %>%
+  spread(temp, value)  %>%
+  replace(is.na(.), 0) %>%
+  mutate(sum = rowSums(.[2:7]))
+
+spt$fam_name <- species.table$Fam_name[match(spt$Sci_name, species.table$Sci_name)] 
+ 
+spt[,c(9,1:8)]%>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped", full_width = F)
+```
+
+
 
 ### Number of set traps per depth
 Violin plot of depths at wich traps were set. I prefer this visualization of depth ranges of the traps, rather than a (boring) table. 
 ```{r traps per depth}
-c2 <- catch %>% group_by(ss) %>% summarise(first(depth), first(gear), first(id), first(survey), first(survey_m))
+
+# New facet label names for survey variable
+#survey.labs <- c("Nov.2012", "May.2013", "Nov.2013")
+#names(survey.labs) <- c("Survey 1: Nov. 2012", "Survey 2: May 2013",  "Survey 3: Nov. 2013")
+
+c2 <- catch %>% dplyr::group_by(ss) %>% dplyr::summarise(first(depth), first(gear), first(id), first(survey), first(survey_m))
 colnames(c2) <- c("ss", "depth", "gear", "id", "survey", "survey_m")
+c2$survey_m <- as.factor(c2$survey_m)
 
 dp <- ggplot(subset(c2, gear=="TB" & depth!=0), aes(as.factor(id), depth))
 
-dp <- dp +  geom_violin(scale="width", aes(fill=as.factor(id)), draw_quantiles = c(0.5)) + scale_y_reverse() + labs(x="Management areas", y="Depth (m)") + scale_fill_manual(name="Management area",values=sequential_hcl(n = 7, h = c(0, -100), c = c(80, NA, 40), l = c(53, 75), power = c(1, 1), rev = TRUE, register = ), guide=FALSE ) +theme_bw()  +facet_wrap(~as.factor(survey_m))
+dp <- dp +  geom_violin(scale="width", aes(fill=as.factor(id)), draw_quantiles = c(0.5)) + scale_y_reverse() + labs(x="Management areas", y="Trap set depth (m)") + scale_fill_manual(name="Management area",values=sequential_hcl(n = 7, h = c(0, -100), c = c(80, NA, 40), l = c(53, 75), power = c(1, 1), rev = TRUE, register = ), guide=FALSE ) +theme_bw()  +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May.2013",
+      "Survey 3: Nov. 2013" = "Nov.2013")))
+
+
 
 dp
 tiff(file="./figs/trap_area_depth.tiff", width=3000, height=1500, res=400, pointsize=10, compression=c("none"))
@@ -333,25 +376,241 @@ dp
 dev.off()
 
 
+
 ```
+
+####Test differneces in depths in each area between years and between areas
+
+```{r  test depth, echo=FALSE}
+
+c3 <- subset(catch, gear=="TB") %>% 
+  dplyr::group_by(ss) %>% 
+  dplyr::summarise(id=first(id), Fhrs=first(Fhrs), depth=first(depth), gear=first(gear), id=first(id), survey=first(survey), survey_m=first(survey_m))
+
+#' test for normality
+shapiro.test(c3$depth)
+
+# significan difference, e.g null-hypothesis that data are normally distributed is rejected
+
+#' Q-Q plots
+ggplot(data = c3, mapping = aes(sample = depth,  fill = factor(id))) + qqplotr::stat_qq_band() + qqplotr::stat_qq_line() + qqplotr::stat_qq_point(size=0.2) + facet_wrap(~ id, scales="free") +  labs(x = "depth predicted", y = "depth Observed") + ggtitle("Q-Q plots depth")
+
+#CONCLUSION: Depth is NOT normally distributed, so can use ANOVA for analysis of variance
+
+# Use non-parametric Kruskal-Wallis test
+
+#' 1 - test for difference between areas
+kruskal.test(c3$depth, c3$id)
+#significant difference
+
+#' Post-Hoc tests of Kruskal - Wallis results
+#library("PMCMR", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
+PMCMR::posthoc.kruskal.nemenyi.test(c3$depth, c3$id, "Chisq")
+
+#' significant difference between areas 1:5, 2:5, 5:6, 5:7
+
+
+#' 2 - test for differences between areas and surveys
+surv <- levels(as.factor(c3$survey))
+for (i in 1:length(surv)){ 
+  ci <- subset(c3, survey==surv[i])
+  print(surv[i])
+  print(kruskal.test(ci$depth, ci$id))
+  print(PMCMR::posthoc.kruskal.nemenyi.test(ci$depth, ci$id, "Chisq"))
+}
+
+# significant differences between
+# Nov. 2012 - between 1:5, 2:5, 5:6, 5:7 
+# May 2013 - between 2:5
+# Nov 2013 - Not significan K-W test and no significan pairwise differences. 
+
+```
+Depth data were not normally distributed and hence the difference in depth could only be analyzed using non-parametric Kruskal - Wallis rank sum test. 
+
+Of the 63 survey - area comparisons, depth distributions were different between areas as follows:
+Nov.2012 survey:
+1:5, 2:5, 5:6 and 5:7  
+May 2013 survey:
+2:5
+
+No significant differences for the Nov. 2013 survey
+
+
+
+##### GAM model of trap depths
+Fits a GAM model (using GAMLSS package) to the depth with area as explanatory variable and survey as a random factor. Use 'chooseDIst' function to test which distribution on the positive real line best fit the data. 
+```{r GAM depths random survey, echo=FALSE}
+
+# using the function chooseDist()
+# fitting normal distribution model
+#m1 <- gamlss(depth~factor(id)+factor(survey),  family=NO, data=c3)
+m1 <- gamlss(depth~factor(id)+random(factor(survey)),  family=NO, data=c3)
+
+# choose a distribution on the positive real line 
+t1 <- chooseDist(m1, type="realplus")
+
+# the GAIC's
+t1
+
+# only 'exGAUS' and 'PARETO2' and 'PARETO2o' were able to run, with 'exGAUS' giving the best GAIG fit. 
+
+# ordering according to  BIC
+getOrder(t1,3)
+
+#updating the model with the best distribution 'EXGAUS'
+fm<-update(m1, family=names(getOrder(t1,3)[1]))
+summary(fm)
+#plot(fm)
+# Significant factors: areas 3, 4, 5, and 6 
+
+histDist(depth,family="exGAUS", ymax=0.05, nbins=20, data=c3)
+
+```
+
+The GAMLSSS model picked 'exGAUS' as the best distribution to use in the model, which seems sensible from plotting the model over historgram of the depth. 
+
+Using the 'exGAUS' model areas 3, 4, 5 and 6 come out as significant factors, meaning the depth in these areas are significantly different from depths in other areas. However, the model does not say which pairwise area comparisons (within each survey) are significantly different. 
+
+##### Combination of GAMLSS model and Kruskal - Wallis
+The GAMLSS model shows that there are signicant effects of area 3, 4, 5, and 6 on the depth distribution, and the K-W test shows significant differences for the Nov. 2012 survey between area 1:5, 2:5, 5:6, 5:7 and for the May 2013 survey for areas 2:4, which is in corrspondence with the GAM results. 
+
+```{r GAM survey as factor, echo=FALSE}
+m1 <- gamlss(depth~factor(id)+factor(survey),  family=NO, data=c3)
+t1 <- chooseDist(m1, type="realplus")
+getOrder(t1,3)
+fm<-update(m1, family=names(getOrder(t1,3)[1]))
+summary(fm)
+
+```
+
+
+Running the GAMLSS model with survey as a factor (not random), shows that the November 2012 survey has significant effects on the depth, while the  other two surveys don't have a significant effect on depth. 
+The conclusion is therefore that depth distribution of traps is significantly different in for the Nov. 2012 survey compared to the other two, with areas 3,4,5, and 6 being significantly different on the area level. 
+
+
+### Duration of trap sets 
+
+#### Mean, min & max hrs. of fishing
+```{r hrs of fishing, echo=FALSE}
+subset(catch, gear=="TB") %>% 
+  dplyr::group_by(ss) %>% 
+  dplyr::summarise(id=first(id), fhrs=first(Fhrs)) %>% 
+  dplyr::group_by(id) %>%
+  dplyr::summarise( maxhrs=max(fhrs), minhrs=min(fhrs), meanhrs=mean(fhrs)) %>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped", full_width = F)
+
+#overall mean Fhrs
+summary(subset(catch, gear=="TB") %>% 
+  group_by(ss) %>% 
+  dplyr::summarise(id=first(id), fhrs=first(Fhrs)))
+
+```
+
+
+### Fishing hours (traps) by survey and area
+Boxplot of median with mean values plotted as red circle. 
+```{r duration traps, echo=FALSE}
+
+c3 <- subset(catch, gear=="TB") %>% 
+  dplyr::group_by(ss) %>% 
+  dplyr::summarise(id=first(id), Fhrs=first(Fhrs), depth=first(depth), gear=first(gear), id=first(id), survey=first(survey), survey_m=first(survey_m))
+c3$survey_m <- as.factor(c3$survey_m)
+
+
+duration.plot <- ggplot(c3, aes(as.factor(id), Fhrs))
+
+duration.plot <-  duration.plot +  geom_boxplot() + stat_summary(fun.y=mean, geom="point", shape=20, size=4, color="red", fill="red") + labs(x="Management areas", y="Hours fishing (traps)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May.2013",
+      "Survey 3: Nov. 2013" = "Nov.2013")))
+
+duration.plot
+#a1 <- subset(c3, id==1)
+#ggplot(a1, aes(as.factor(id), Fhrs)) + geom_boxplot()+facet_wrap(~as.factor(survey_m))
+
+#by(a1$Fhrs, a1$survey, summary)
+```
+The average trap soak-time (fishing hours) across all surveys and areas was 17.984 hrs with a median of 16.15, but the November 2012 survey had more varied and higher soak times than the May 2013 and Nov. 2013. 
+
+#### Test differences in soak times (traps) K-W test
+```{r  test Fhrs traps, echo=FALSE}
+#' test for normality
+shapiro.test(c3$Fhrs)
+
+#' Q-Q plots
+ggplot(data = c3, mapping = aes(sample = Fhrs,  fill = factor(id))) + qqplotr::stat_qq_band() + qqplotr::stat_qq_line() + qqplotr::stat_qq_point(size=0.2) + facet_wrap(~ id, scales="free") +  labs(x = "Fhrs predicted", y = "Fhrs Observed") + ggtitle("Q-Q plots depth")
+
+#CONCLUSION: Fishing hours (soak time) is NOT normally distributed, so can use ANOVA for analysis of variance
+
+# Use non-parametric Kruskal-Wallis test
+
+#' 1 - test for difference between areas
+kruskal.test(c3$Fhrs, c3$id)
+#significant difference
+
+#' Post-Hoc tests of Kruskal - Wallis results
+#library("PMCMR", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
+PMCMR::posthoc.kruskal.nemenyi.test(c3$Fhrs, c3$id, "Chisq")
+
+#' significant difference between areas 7:1, 7:2, 6:2, 7:4, 6:4, 7:5, 
+
+
+#' 2 - test for differences between areas and surveys
+surv <- levels(as.factor(c3$survey))
+for (i in 1:length(surv)){ 
+  ci <- subset(c3, survey==surv[i])
+  print(surv[i])
+  print(kruskal.test(ci$Fhrs, ci$id))
+  print(PMCMR::posthoc.kruskal.nemenyi.test(ci$Fhrs, ci$id, "Chisq"))
+}
+
+# Significant differences between:
+# Nov 2012- between: 1:7, 7:2, 6:2, 7:3, , 7:4, 6:4, 5:6
+# May 2013 - between: 2:6, 2:7, 3:6, 3:7, 4:6, 4:7
+# Nov 2013 - between: 1:6, 2:6, 2:7
+
+```
+Of the 63 area- survey combinations 16 were significantly different (Kruskal Wallis rank sum test with Nemenyi post-hoc test, p<0.05). In Nov. 2012 area 1 was significantly different from 7, area 2 from 6 and7, area 3:7, area 4 vs 6 and 7, area 5 vs 6. In May 2013 area 2 was significantly different from 6 and 7, area 3 from 6 and 7, and area 4 from 6 and 7. In Nov 2013 area 1 was significantly different from area 6, while area 2 was significantly different from area 6 and 7.  
+
+#### GAMLSS model of soak times
+```{r GAM soak time, echo=FALS}
+#m1 <- gamlss(Fhrs~factor(id)+factor(survey),  family=NO, data=c3)
+m1 <- gamlss(Fhrs~factor(id)+random(factor(survey)),  family=NO, data=c3)
+t1 <- chooseDist(m1, type="realplus")
+getOrder(t1,3)
+fm<-update(m1, family=names(getOrder(t1,3)[1]))
+summary(fm)
+
+histDist(Fhrs,family="BCPEo", ymax=0.05, nbins=60, data=c3)
+
+```
+
+GAMLSS found the 'BCPEo' to give the best fit to the 'Fhrs' data (see histogram plot).
+
+Using the 'BCPEo' distribution a model of Fhrs by area (as factor) and survey as a random factor showed that all areas had a significant effect on the soak time for traps, meaning that soak time varied siginificantly between the areas. 
+
+If including survey as a factor in the model all surveys also had a significant effect of Fhrs, showing that soak time varied significantly between all surveys and areas. 
 
 
 
 
 ## Analysis of catches by traits and other factors
 
-### Catch rates pr area
-```{r CPUE area}
+### Catch rates pr area & survey
+Must aggregate data per station
+```{r CPUE traps area, echo=FALSE}
 
-#´ Explore: Trap Catch rates (CPUE) by depth and survey
-#' not used in MS
-#d3 <- ggplot(subset(catch, gear=="TB"), aes(depth, CPUEw))
-#d3 + geom_point() + geom_smooth(method="auto")  +facet_wrap(~as.factor(survey_m))
+cpue.tr.st <- subset(catch.cpue, gear=="TB") %>% 
+  dplyr::group_by(ss) %>% 
+  dplyr::summarise(id=first(id), Fhrs=first(Fhrs), CPUEw=sum(CPUEw), depth=first(depth), gear=first(gear), id=first(id), survey=first(survey), survey_m=first(survey_m))
+cpue.tr.st$survey_m <- as.factor(cpue.tr.st$survey_m)
 
-#' main catch by depth plot pr area
-ca.plot<-ggplot(subset(catch, gear=="TB" & depth!=0), aes(as.factor(id), CPUEw))
+ca.plot<-ggplot(subset(cpue.tr.st,  depth!=0), aes(as.factor(id), CPUEw))
 
-ca.plot <- ca.plot + geom_violin(scale="width", aes(fill=as.factor(id)), draw_quantiles = c(0.5))  + labs(x="Management areas", y="CPUE kg/hrs fishing") + scale_fill_manual(name="Management area",values=sequential_hcl(n = 7, h = c(0, -100), c = c(80, NA, 40), l = c(53, 75), power = c(1, 1), rev = TRUE, register = ), guide=FALSE ) +theme_bw() +facet_wrap(~as.factor(survey_m))
+
+ca.plot <- ca.plot + geom_violin(scale="width", aes(fill=as.factor(id)), draw_quantiles = c(0.5))  + labs(x="Management areas", y="CPUE kg/hrs fishing (traps") + scale_fill_manual(name="Management area",values=sequential_hcl(n = 7, h = c(0, -100), c = c(80, NA, 40), l = c(53, 75), power = c(1, 1), rev = TRUE, register = ), guide=FALSE ) +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May.2013",
+      "Survey 3: Nov. 2013" = "Nov.2013")))
 ca.plot
 
 tiff(file="./figs/catch_rates_traps_area_survey.tiff", width=3000, height=2000, res=400, pointsize=10, compression=c("none"))
@@ -359,20 +618,289 @@ ca.plot
 dev.off()
 ```
 
+
+## Statistical analysis CPUE catches
+### Testing for normality of CPUEw of trap catches
+Shapiro test for normality and Q-Q plots shows that data is non-normal and zero-inflated. 
+
+```{r normality test}
+
+#' test for normality
+shapiro.test(cpue.tr.st$CPUEw)
+
+#' Q-Q plots
+library("qqplotr")
+gg <- ggplot(data = cpue.tr.st, mapping = aes(sample = CPUEw,  fill = factor(id))) + stat_qq_band() + stat_qq_line() + stat_qq_point(size=0.2) + facet_wrap(~ id, scales="free") +  labs(x = "CPUEw predicted", y = "CPUEw Observed") + ggtitle("Q-Q plots CPUEw")
+gg
+```
+### Test for difference in CPUEw of traps between areas (non-parametric test)
+Both CPUEw  is not significantly different between the areas, 
+
+Significant difference for CPUEW between Nov 2013 survey and the Nov 2012 and May 2013 surveys, but not between the Nov12 and May13 surveys
+
+```{r nonpara ANOVA, echo=FALSE}
+#### NOT RUN BECAUSE ZERO-ADJUSTED GAM MODEL IS BETTER!
+
+#' 1 - test for difference between areas
+kruskal.test(cpue.tr.st$CPUEw, cpue.tr.st$id)
+
+#' Post-Hoc tests of Kruskal - Wallis results
+library("PMCMR", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
+posthoc.kruskal.nemenyi.test(cpue.tr.st$CPUEw, cpue.tr.st$id, "Chisq")
+#' no significant difference in CPUE
+
+#' 2 test for differences between surveys
+kruskal.test(cpue.tr.st$CPUEw, cpue.tr.st$survey)
+
+posthoc.kruskal.nemenyi.test(cpue.tr.st$CPUEw, cpue.tr.st$survey, "Chisq")
+
+```
+
+### Zero-inflated model (better approach)
+This method is more appropriate than the Kruskal-Wallis approach above as it evaluates the effects of all factors at the same time, instead of evaluating the effects of area separate from survey. 
+
+First, developed a model for CPUE (weight and numbers) including depth, area, survey and gear (only traps and gillnets), which performed better than a simpler model excluding gear. 
+
+Also tested models where survey was included as a random factor (using two different approaches: ´random´and ´re´), although this excludes evaluation of the potential significant effects of the surveys on the results. 
+
+Tested models for both CPUE by weight (CPUEw) and CPUE by numbers (CPUEn). 
+
+Model performance were compared based on AIC. 
+
+
+```{r zero-infl model, echo=FALSE}
+cpue.st <- subset(catch.cpue, gear=="TB" | gear=="GN") %>% 
+  dplyr::group_by(ss) %>% 
+  dplyr::summarise(id=first(id), Fhrs=first(Fhrs), CPUEw=sum(CPUEw), CPUEn=sum(CPUEn), weight=sum(weight), number=sum(number), depth=first(depth), gear=first(gear), id=first(id), survey=first(survey), gear=first(gear), survey_m=first(survey_m))
+cpue.st$survey_m <- as.factor(cpue.st$survey_m)
+
+# Testing different Zero-Inflated models for the data:
+# CPUEw - GAMLSS ZAGA model incluing survey, area, depth & gear 
+mod<-gamlss(CPUEw~depth+factor(id)+factor(survey)+factor(gear),family=ZAGA, data=cpue.st) 
+
+# Model with survey as random effect
+mod2<-gamlss(CPUEw~depth+factor(id)+factor(gear)+random(factor(survey)),family=ZAGA, data=cpue.st) 
+
+# model with survey as random effect, using re() function form lme
+library(nlme)
+mod3<-gamlss(CPUEw~depth+factor(id)+factor(gear)+re(random=~1|survey),family=ZAGA, data=cpue.st) 
+
+# specifcying nu.fo
+mod4 <-gamlss(CPUEw~depth+factor(id)+factor(gear)+random(factor(survey)),nu.fo=~depth+factor(id)+factor(gear)+random(factor(survey)), family=ZAGA, data=cpue.st) 
+
+#  ZAIG model 
+mod5 <-gamlss(CPUEw~depth+factor(id)+factor(gear)+random(factor(survey)), family=ZAIG, data=cpue.st) 
+
+
+
+AIC(mod, mod2, mod3, mod4, mod5)
+
+#alternative model of weight with Fhrs as factor
+modA1<-gamlss(weight~depth+Fhrs+factor(id)+factor(survey)+factor(gear),family=ZAGA, data=cpue.st) 
+
+# modA1 with survey as random factor
+modA2 <- gamlss(weight~depth+Fhrs+factor(id)+random(factor(survey))+factor(gear),family=ZAGA, data=cpue.st) 
+
+#alt model of numbers with CPUEn
+modA3<-gamlss(CPUEn~depth+factor(id)+factor(survey)+factor(gear),family=ZAGA, data=cpue.st) 
+
+# modA3 with number of catch with Fhrs as factor
+modA4 <- gamlss(number~depth+Fhrs+factor(id)+factor(survey)+factor(gear),family=ZAGA, data=cpue.st) 
+
+AIC(mod, mod2, mod3, mod4, modA1, modA2, modA3, modA4)
+
+# Best  model for catch weight is model 4 (CPUEw) while model A3 is the best for numbers (CPUEn)
+# the CPUEn (Numbers model) has a much lower AIC than the CPUEw model
+summary(mod4)
+plot(mod4)
+wp(mod4, ylim.all=2); title("model 4 - using 'random(), nu-function specified'")
+
+summary(modA3)
+plot(modA3)
+wp(modA3, ylim.all=2); title("model 4 - using 'random(), nu-function specified'")
+
+#plotting ZAGA distribution & histogram of CPUEw
+plotZAGA(mu=fitted(mod4, "mu")[1], sigma=fitted(mod2, "sigma")[1],nu=fitted(mod2, "nu")[1], main="(a)", ylab="density")
+
+hist(cpue.st$CPUEw, breaks=50)
+```
+
+##### Model for weight of catch (CPUEw) 
+Gear was the only factor significantly affecting CPUEw in any of the models run, also in model 4 (with the lowest AIC). 
+
+Depth had no significant effect on CPUE in these models, neither did area. 
+
+##### Model for number of catch (CPUEn)
+Depth, area (2 & 5), surveys and gear were all found to have a significant effect on CPUEn. 
+
+The model with survey as a normal factor (not random) had  the lowest AIC. This also allowed to evaluate wether surveys had significant effects on the CPUE. 
+
+
+#### GAM model CPUE - traps only
+Statistical analysis of plot of trap catch rates
+```{r GAM Traps only, echo=FALSE}
+
+c22 <- subset(cpue.st, gear=="TB")
+
+# Model of CPUEw with survey as random effect
+mod22<-gamlss(CPUEw~depth+factor(id)+random(factor(survey)),family=ZAGA, data=c22) 
+
+#model of CPUEw with survey as factor
+mod33 <- gamlss(CPUEw~depth+factor(id)+factor(survey),family=ZAGA, data=c22) 
+
+#model of CPUEn with survey as random factor
+mod44 <-gamlss(CPUEn~depth+factor(id)+random(factor(survey)),family=ZAGA, data=c22) 
+
+#model of CPUEn with survey as factor
+mod55 <- gamlss(CPUEn~depth+factor(id)+factor(survey),family=ZAGA, data=c22) 
+
+
+AIC(mod22, mod33, mod44, mod55)
+#mod55 had the lowest AIC
+summary(mod55)
+```
+
+Using CPUE-weight data for traps in a simlar ZAGA GAMLSSS model (with survey as a random factor) showed that neither area or depth had  significant effects on the CPUEw of traps. Including survey as an ordinary factor in the model (mod33) increased the fit (lower AIC), and identified that the Nov 2013 survey had significant effect on the CPUEw - that the observed lower catch rates during this survey were significantly different from the other two surveys. 
+
+Similar models using CPUE-numbers had lower AIC, with the model using survey as an ordinary factor (mod55) having the lowest AIC. For mod55 all surveys, as well as areas 2 and 5 were significant factors. 
+
+
+```{r freqplot trap and gillnet depth, echo=false}
+
+ggplot(cpue.st, aes(depth, colour = gear)) +  geom_freqpoly(binwidth = 5) +
+  labs(title = "Bottom depth of trap and gill-net stations",
+              subtitle = "i.e. fishing depth for traps, while gillnets were floating at the surface and fishing at 0-m depth") 
+
+t.test(subset(cpue.st, gear=="TB")$depth, (subset(cpue.st, gear=="GN")$depth))
+
+```
+
+Depth was, however, not a significant factor in any of the four models developed for the trap CPUE, by weight or numbers. The depth distribution of bottom depth at the trap and gillnet stations (Gillnet fishing depth was at the surface, while trap fishing depth = bottom depth) were significantly different (t-test, p<0.05, df=67.9 -  see also frequncy plot above). Therefore, the models including both gear types led to a wider span and a more diverse distribution of the depths than for the traps-only data set. 
+
+
+
+### Combine plots of traps in one panels
+Use 'patchwork' package to arrange plots
+```{r trap plots patchwork, echo=FALSE}
+
+pw1 <- (dp | duration.plot) / ca.plot + plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 10)) +theme_minimal()
+pw1
+ggsave("./figs/traps combined panel.png")
+```
+
+
+
+
+
+
+
 ### CPUE by gear type  - by family and trophic group
+Only for gillnets and traps
 ```{r CPUE gear}
 # by genus (families)
-catch.3gear<-subset(catch.unmod, gear=="GN" | gear=="HL" | gear =="TB")
+#catch.3gear<-subset(catch.unmod, gear=="GN" |  gear =="TB")
+c4 <- subset(catch.traits, TGShort!="NA" & (gear=="TB" | gear=="GN"))
 
-gear.plot <- ggplot(catch.3gear, aes(capwords(tolower(as.character(catch.3gear$FamGroup))), fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=weight)) +theme_bw() + facet_grid(vars(gear), vars(survey_m)) + coord_flip() +xlab("") + ylab("kg")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none")
+
+c4$FamGroup2 <- as.factor(capwords(tolower(as.character(c4$FamGroup))))
+
+gear.plot <- c4 %>%  mutate(FamGroup2 = fct_relevel(FamGroup2,  "Other Spp", "Serranidae","Scombridae","Lutjanidae", "Lethrinidae", "Chirocentridae", "Carcharhinidae", "Carangidae",  "Acanthuridae")) %>%
+ ggplot( aes(FamGroup2, fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=CPUEw)) +theme_bw() + facet_grid(vars(gear), vars(survey_m), labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May 2013",
+      "Survey 3: Nov. 2013" = "Nov.2013"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE) 
 gear.plot
-ggsave("./figs/gearplot_species.tiff")
+#ggsave("./figs/gearplot_species.tiff")
+
 
 # by trophic group
-gear.plot2 <- ggplot(subset(catch.traits, TGShort!="NA"), aes(TGShort, fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=weight)) +theme_bw() + facet_grid(vars(gear), vars(survey_m)) + coord_flip() +xlab("") + ylab("kg")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none")
+gear.plot2 <- ggplot(c4, aes(TGShort, fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=CPUEw)) +theme_bw() + facet_grid(vars(gear), vars(survey_m), labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May 2013",
+      "Survey 3: Nov. 2013" = "Nov.2013"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE)
 gear.plot2
-ggsave("./figs/gearplot_trophic_group.tiff")
+#ggsave("./figs/gearplot_trophic_group.tiff")
+
+
+# Combine plots in patchwork 
+pw2 <- gear.plot / gear.plot2 + plot_layout(guides = "keep") + plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 10)) & 
+  theme(text = element_text(size=5)) +theme(axis.text.y = element_text(size=8))  +theme_minimal() + theme(panel.border = element_rect(linetype = "solid", fill = NA))
+pw2  
+
+#pw2 + plot_layout(heights = unit(c(4, 4), c('cm', 'null')))
+ggsave("./figs/gearplot_trophic_group_combined.tiff", width=10, height=10)
+
 ```
+
+#### Test differences in CPUE By Species in trap catches, by range of traits and factors
+Use GAM model and evaluate how CPUE by weight (CPUEw) was affected by physical / area /surve factors and the traits :
+- depth
+- survey (random factor)
+- area
+- family group
+- trophic group
+- trophic level (linked to trophic group)
+- Place in water column
+- Diel activity
+- Habitat 
+- Gregariousness
+- MaxLength
+
+```{r GAM CPUEw by all factor, echo=FALSE}
+
+#mod6<-gamlss(CPUEw~depth+factor(id)+factor(gear)+random(factor(survey))+TrophicLevel+factor(TGShort)+factor(WaterCol)+factor(DielActivity)+factor(Habitat)+factor(Gregariousness)+factor(FamGroup2),family=ZAGA, data=na.omit(c4)) 
+#summary(mod6)
+
+# traps only, CPUE by numbers, survey as random factor
+mod7<-gamlss(CPUEn~depth+factor(id)+random(factor(survey))+TrophicLevel+factor(TGShort)+factor(WaterCol)+factor(DielActivity)+factor(Habitat)+factor(Gregariousness)+MaxLength,family=ZAGA, data=na.omit(subset(c4, gear=="TB"))) 
+#summary(mod7)
+
+# traps only, CPUE by numbers, survey as ordinary factor
+mod8 <- gamlss(CPUEn~depth+factor(id)+factor(survey)+TrophicLevel+factor(TGShort)+factor(WaterCol)+factor(DielActivity)+factor(Habitat)+factor(Gregariousness)+MaxLength,family=ZAGA, data=na.omit(subset(c4, gear=="TB"))) 
+#summary(mod8)
+
+#model for 'numbers' with fishing hours as factor, survey as random factor
+mod9 <- gamlss(number~depth+Fhrs+factor(id)+random(factor(survey))+TrophicLevel+factor(TGShort)+factor(WaterCol)+factor(DielActivity)+factor(Habitat)+factor(Gregariousness)+MaxLength,family=ZAGA, data=na.omit(subset(c4, gear=="TB"))) 
+#summary(mod9)
+
+#model for 'numbers' with fishing hours as factor, survey as ordinary factor
+mod10 <- gamlss(number~depth+Fhrs+factor(id)+factor(survey)+TrophicLevel+factor(TGShort)+factor(WaterCol)+factor(DielActivity)+factor(Habitat)+factor(Gregariousness)+MaxLength,family=ZAGA, data=na.omit(subset(c4, gear=="TB"))) 
+
+
+AIC(mod7, mod8, mod9, mod10)
+#mod8 had lowest AIC
+summary(mod8)
+
+```
+... this needs more thinking.... 
+
+Evaluting catches of fish in relation to their traits. Should be evaluated by numbers, for single large fish not to dominate the results. The model based on CPUE by numbers (mod8) had much lower AIC than models with numbers and fishing hours as a factor.  Also, including survey as an ordinary factor led to lower AIC than including it as a random factor. 
+
+Model (mod8) results show that numbers of fish caught (CPUE by numbers) was significantly affected by:
+- area 6
+- Nov. 2013 survey
+- trophic level
+- trophic group: invertivores and planktivores
+- place in water column (all 3 classes)
+- diel activity (night)
+- coral habitat
+- gregariousness: 2&3
+- Max length
+
+Interpretation of results: 
+There is no effect of depth, wich is consistent with the models for CPUEn above (on all data, without the traits). The Nov 2013 survey and area 6 were significant factors, indicating that these were differnt from the other areas & surveys. Surprisingly, the trophic groups invertivores and planktivores were significant factors. Place in water colum was significant for all categories of this trait,  nocturnal fish prefering coral habitats, siz of the fish,  and of gregariouslevels 2 & 3 were also significant factors. 
+
+Biological explanation (possible): 
+These results indicates that catch in numbers of traps is dependent on demersal and other site-attached fish, linked to coral habitats, with some gregariousness, of certain max-length in an area. This is consistent with traps being set at the bottom close to coral reefs (not on sandy habitats), and the way traps work - attracting gregarious fish with bait. The entry into the traps is limited to fish of a certain size range, and the mesh size of the traps means that only fish larger than a certain size were retained. 
+
+The significance of invertivores and planktivores in relation to the catches is more difficult to interpret, but these are often species occurring in schools attracted to debris of bait spread out by larger fish feeding on the trap bait. 
+
+Also, area 6 and the November 2013 survey were significant factors pointing to systematic differnences in the catch rates for this area and survey, consistent with the results from the CPEUn analysis of all gear stations  (without including traits) above.  
+
+```{r histogram max lenght, echo=false}
+ggplot(subset(c4, gear=="TB"), aes(MaxLength)) +geom_freqpoly(binwidth = 5)
+```
+
 
 
 ### CPUE by trophic group by area & by survey (year) 
@@ -538,7 +1066,7 @@ spue.df$Species_Hrs <- spue.df$Nsp / spue.df$Fhrs
 #hist(spue.df$spue)
 
 # zero-adjusted model:
-sd.mod<-gamlss(Species_Hrs~depth+factor(area)+factor(survey),family=ZAGA, data=spue.df) # AIC: -4161
+sd.mod<-gamlss(Species_Hrs~depth+factor(area)+random(factor(survey)),family=ZAGA, data=spue.df) # AIC: -4161
 # gamlss(Species_Hrs~factor(area)+factor(survey),family=ZAGA, data=spue.df)  # AIC: - 4163 - slightly better than the one above, but want to show the one with 'depth' as a factor. 
 summary(sd.mod)
 ```
@@ -681,71 +1209,6 @@ write.csv2(round(results.table, digits = 3), "./figs/results_table.csv")
 
 
 ***
-## Statistical analysis CPUE catches
-### Testing for normality of CPUE catches
-Shapiro test for normality and Q-Q plots shows that data is non-normal and zero-inflated. 
-```{r normality test}
-catch.df<-subset(catch1, number>0 & weight>0)
-
-#' test for normality
-shapiro.test(catch.df$CPUEw)
-shapiro.test(catch.df$CPUEn)
-
-#' Q-Q plots
-library("qqplotr")
-gg <- ggplot(data = catch.df, mapping = aes(sample = CPUEw,  fill = factor(id))) + stat_qq_band() + stat_qq_line() + stat_qq_point(size=0.2) + facet_wrap(~ id, scales="free") +  labs(x = "CPUEw predicted", y = "CPUEw Observed") + ggtitle("Q-Q plots CPUEw")
-gg
-```
-### Test for difference in CPUE between areas (non-parametric test)
-Both CPUEw and CPUEn are significantly different between the areas, but only CPUEn in the pairwise tests (nemenyi post-hoc) for areas 4:3 and 6:4. THis points to that Area 4 is the 'odd one out' in terms of CPUE along the Sudanses coast. 
-
-Significant difference for CPUEW between May 2013 survey and the Nov 2012 and Nov 2013 surveys, but not between the Nov12 and Nov13 surveys
-
-```{r nonpara CPUA, eval=FALSE}
-#### NOT RUN BECAUSE ZERO-ADJUSTED GAM MODEL IS BETTER!
-
-#' 1 - test for difference between areas
-kruskal.test(catch.df$CPUEw, catch.df$id)
-kruskal.test(catch.df$CPUEn, catch.df$id)
-
-#' Post-Hoc tests of Kruskal - Wallis results
-library("PMCMR", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
-posthoc.kruskal.nemenyi.test(catch.df$CPUEw, catch.df$id, "Chisq")
-posthoc.kruskal.nemenyi.test(catch.df$CPUEn, catch.df$id, "Chisq")
-#' significant difference in CPUEn between area 6 and area 4
-
-#' 2 test for differences between surveys
-kruskal.test(catch.df$CPUEw, catch.df$survey)
-kruskal.test(catch.df$CPUEn, catch.df$survey)
-
-posthoc.kruskal.nemenyi.test(catch.df$CPUEw, catch.df$survey, "Chisq")
-posthoc.kruskal.nemenyi.test(catch.df$CPUEn, catch.df$survey, "Chisq")
-```
-
-### Zero-inflated model (better approach)
-This method is more appropriate than the Kruskal-Wallis approach above as it evaluates the effects of all factors at the same time, instead of evaluating the effects of area separate from survey. 
-
-Developed a model for CPUEw including depth, area, survey and gear, which performed better than a simpler model excluding gear. 
-
-Depth is not significant
-
-Significant factors:
-
-* Area (1, 5, 6 and 7)
-* Surveys (all)
-* Gear (all gear types)
-```{r zero-infl model}
-#' Fitting GAM Zero Inflated model to catch data
-
-# select only variables used in model
-c2 <- catch[,c(1,14,22,25,28)]
-c2 <- subset(c2, gear=="TB" | gear=="GN" |gear=="HL")
-
-# CPUEw - GAMLSS ZAGA model incluing survey, area, depth & gear 
-mod<-gamlss(CPUEw~depth+factor(id)+factor(survey)+factor(gear),family=ZAGA, data=c2) 
-summary(mod)
-```
-
 
 
 
