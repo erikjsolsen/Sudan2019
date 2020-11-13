@@ -381,7 +381,7 @@ dp <- ggplot(subset(c2, gear=="TB" & depth!=0), aes(as.factor(id), depth))
 
 #dp <- dp +  geom_violin(scale="width", aes(fill=as.factor(id)), draw_quantiles = c(0.5)) + scale_y_reverse() +stat_summary(fun.data = give.n, geom = "text", fun.y = median) + labs(x="Management areas", y="Trap set depth (m)") + scale_fill_manual(name="Management area",values=sequential_hcl(n = 7, h = c(0, -100), c = c(80, NA, 40), l = c(53, 75), power = c(1, 1), rev = TRUE, register = ), guide=FALSE ) +theme_bw()  +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",      "Survey 2: May 2013" = "May.2013",      "Survey 3: Nov. 2013" = "Nov.2013")))
 
-dp <- dp +  geom_boxplot(scale="width", aes(), draw_quantiles = c(0.5)) + scale_y_reverse() +stat_summary(fun.data = give.n, geom = "text", fun.y = median, vjust=-1.7) + labs(x="Management areas", y="Trap set depth (m)")  +theme_bw()  +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",      "Survey 2: May 2013" = "May.2013",      "Survey 3: Nov. 2013" = "Nov.2013")))
+dp <- dp +  geom_boxplot(scale="width", aes(), draw_quantiles = c(0.5)) + scale_y_reverse() + labs(x="Management areas", y="Trap set depth (m)")  +theme_bw()  +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",      "Survey 2: May 2013" = "May.2013",      "Survey 3: Nov. 2013" = "Nov.2013")))
 
 dp
 
