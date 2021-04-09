@@ -131,7 +131,7 @@ ps<-rbind(data.frame(x=37.21709967,y=19.600512, group=1, survey_m=c("Survey 1: N
 Adds 'Area' to each line in the catch table. 
 ```{r catch pos to mngmt areas, echo=FALSE}
 #' Create spatial.points data base from catch
-catch.points<- SpatialPoints(catch[8:9])
+catch.points<- SpatialPoints(catch[13:14])
 proj4string(catch.points) <- proj4string(ManageAreas)
 catch.areas<-over(catch.points, ManageAreas)
 
@@ -225,7 +225,9 @@ A nice, bathymetric map of Sudan with management areas overlaid.
 
 Currently fonts and colours are adjusted for use on the ICES ASC 2019 poster, removing the bathy-contour lines (se 'lwd' to 0), and varying the colours of management area text to white for areas 1-4. 
 
-```{r bathymap sudan, echo=FALSE}
+```{r bathymap sudan, echo=FALSE, eval=FALSE}
+# OLD CODE - Not Run 
+
 sudan<-readGEBCO.bathy("./sudan_bathymetry/sudan.nc")
 blues <- colorRampPalette(c("midnightblue", "deepskyblue3", "deepskyblue1", "cadetblue3", "cadetblue1", "darkseagreen1", "white"))
 
@@ -240,7 +242,7 @@ plot(sudan, land = TRUE, n = 10, image = TRUE,
      step = c(500, 200, 0),
      lwd = c(0, 0, 1), lty = c(1, 1, 1),
      col = c("lightgrey", "gray15", "black"),
-     drawlabel = c(TRUE, TRUE, TRUE))
+     drawlabel = c(FALSE, FALSE, FALSE))
 
 scaleBathy(sudan, deg=0.47 ,x="bottomleft", inset=5)
 
@@ -271,15 +273,130 @@ dev.off()
 ![](./figs/sudan_bathy_map.tiff)
 
 
+## Bathymetric map with ggplot and marmap
+New code for making bathymetric map to include depth legend, north arrow and scale bar. 
+```{r NOAA bathy data, echo=FALSE}
+Bathy <- getNOAA.bathy(lon1 = 36.5, lon2 = 39,
+                       lat1 = 18, lat2 = 22, resolution = 1)
+```
+
+
+```{r bathymap ggplot, echo=FALSE, warning=FALSE}
+library(mapproj)
+library(ggsn)
+
+MApoints1<-data.frame(lon=c(37.2, 37.5, 37.37, 37.5, 37.5, 37.8, 38.2), lat=c(21.7, 20.93, 20.3, 19.9, 19, 19.2, 18.5), area=c(1,2,3,4,5,6,7), anames=c("1. \nMarsas \nnorth of \nDungonab", "2. \nDungonab", "3. \nArakiai", "4. \nPort \nSudan", "5. \nSuakin", "6. \nSuakin \narchipelago", "7. Agig"))
+
+cities <- data.frame(lon=c(37.333333, 37.21709967), lat=c(19.1, 19.600512), city=c("Suakin", "Port Sudan"))
+
+
+
+#ctd <- data.frame(Longitude = c(37.5, 38, 38.5), Latitude = c(-47, -46.5, -46))
+
+smap2 <- autoplot.bathy(sudan, geom=c("raster")) +
+    #scale_fill_gradient2(low="dodgerblue4", mid="white", high="gray10") +
+    #geom_point(data = ctd, aes(x = Longitude, y = Latitude), colour = 'black', size = 3, alpha = 1, shape = 15) +
+  scale_fill_gradientn(colors = c("midnightblue", "deepskyblue3", "deepskyblue1", "cadetblue3", "cadetblue1", "darkseagreen1", "white", "gray10"),
+                            values = scales::rescale(c(-2847, -500, -200, -100, -50, -10, 0, 1, 2010))) +
+    geom_path(data=ManageAreas.f,colour="black", aes(x=long, y=lat, group=id)) +
+    labs(y = "Latitude", x = "Longitude", fill = "Elevation") 
+ 
+  smap3 <-   smap2 + north(ManageAreas.f, symbol=10,scale=0.2) +geom_text(data=MApoints1, hjust="left", size=3, aes(x=lon, y=lat, group=area, label=anames)) + geom_point(data=cities, size=2, colour="gray10", aes(x=lon, y=lat)) + geom_text(data=cities, label=cities$city, size=4,  hjust=1.15, vjust=0,  aes(x=lon, y=lat, group=city)) +  scalebar(ManageAreas.f, location="topright", dist = 50, dist_unit = "km", transform = TRUE, model = "WGS84") + theme(legend.position = c(0.9, 0.6))
+
+smap3
+ggsave("./figs/Fig1_bathymap2 sudan.tiff")  
+  
+  
+#create world map
+world <- map_data("world")
+d <- data.frame(x1=c(36.5), x2=c(39), y1=c(18), y2=c(22.3))
+
+regionmap <- ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "black", fill = "lightgray", size = 0.1
+  ) + coord_quickmap(xlim=c(20, 60), ylim=c(0, 40)) + geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), color="red", fill= NA, alpha=0.5) + theme_void() + theme(
+  panel.background = element_rect(fill = "white",
+                                colour = "white",
+                                size = 0.5, linetype = "solid"))
+       regionmap
+    
+#add regionmap as incert to area-map
+png(filename = "./figs/Fig1_bathy_insert.png", width = 3600, height = 2600, res = 300)
+# create a viewport for inset
+# vp_inset width/height arguments set the size of the inset; x and y arguments set the position (from 0 to 1) of the left, top corner of the inset along each axis (i.e. not map coordinates as you have in your annotation custom). You can adjust these as you see fit.
+vp_inset <- grid::viewport(width = 0.2, height = 0.2, x = 0.29, y = 0.252, just = c("left", "top"))
+print(smap3)
+print(regionmap, vp = vp_inset)
+#while (!is.null(dev.list()))  dev.off()
+ dev.off()
+```
+
+
 ## Stations plotted on maps, pr survey
 Faceted map plotting position of all catch stations for each of the three surveys. 
 ```{r station map, echo=FALSE}
-MApoints<-data.frame(lon=c(37.2, 37.53, 37.5, 37.4, 37.3, 37.9, 38.2), lat=c(21.7, 20.92, 20.3, 19.9, 19, 19.3, 18.5), area=c(1,2,3,4,5,6,7))
+library(patchwork)
 
-sudan.map<-ggplot(catch, aes(x=lon, y=lat, group=survey_m)) + geom_point(shape="+", size=6, aes(group=survey_m, colour= survey_m)) + facet_wrap(~survey_m, ncol=3) + geom_path(data=ManageAreas.f,colour="dodgerblue3", aes(x=long, y=lat, group=id)) + geom_polygon(data=world, colour="gray35", fill="gray85", aes(x=long, y=lat, group=survey_m)) +  coord_cartesian(xlim = c(36.5, 39), ylim=c(17.7, 22.5)) + theme_classic() + geom_point(data=ps, size=2, colour="gray35", aes(x=x, y=y)) + geom_text(data=ps, label="PZU", size=3,  hjust=1, vjust=-1.2,  aes(x=x, y=y, group=survey_m)) +geom_text(data=MApoints, aes(x=lon, y=lat, group=area, label=area)) +scale_colour_brewer(type = "seq", palette = "Dark2", name="Survey month & year", labels=c("Nov. 2012", "May. 2013", "Nov. 2013")) + theme(legend.position="none")
-sudan.map
+MApoints<-data.frame(lon=c(37.2, 37.53, 37.5, 37.4, 37.3, 37.9, 38.2), lat=c(21.7, 20.92, 20.3, 19.9, 19, 19.3, 18.5), area=c(1,2,3,4,5,6,7), survey_m=c(1,1,1,1,1,1,1))
 
-ggsave("./figs/Fig2_station_map.tiff")
+#ManageAreas.f$survey_m <- 1
+
+world<- map_data("worldHires", c("Sudan", "Ethiopia")) 
+world$survey_m<-c("Survey 1: Nov. 2012")
+world2<-world
+world2$survey_m<-c("Survey 2: May 2013")
+world3<-world
+world3$survey_m<-c("Survey 3: Nov. 2013")
+world<-rbind(world, world2, world3)
+
+colors <- brewer.pal(3, "Dark2")
+
+s1.map <- ggplot(subset(catch, survey==2012901), aes(x=lon, y=lat)) + 
+  geom_point(shape="+", size=2, colour= colors[1], aes(group=survey_m, colour= survey_m))  + 
+  geom_path(data=ManageAreas.f,colour="dodgerblue3", aes(x=long, y=lat, group=id)) + 
+  geom_polygon(data=world, colour="gray35", fill="gray85", aes(x=long, y=lat, group=survey_m))  + 
+  coord_cartesian(xlim = c(36.58, 39), ylim=c(17.87, 22.5)) +
+  theme_classic() + 
+  geom_point(data=ps, size=2, colour="gray35", aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=ps, label="PZU", size=3,  hjust=1, vjust=-1.2,  aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=MApoints, aes(x=lon, y=lat, group=survey_m, label=area)) +
+  theme(legend.position="none")  +
+  ggsn::north(ManageAreas.f, symbol=10,scale=0.2, location="topright") +  
+  ggsn::scalebar(ManageAreas.f, location="bottomleft", dist = 50, dist_unit = "km", transform = TRUE, model = "WGS84", st.size=3, nudge_y=-0.05) + 
+  ggtitle("Survey 1: Nov. 2012")
+
+
+s2.map <- ggplot(subset(catch, survey==2013002), aes(x=lon, y=lat)) + 
+  geom_point(shape="+", size=2, colour= colors[2], aes(group=survey_m, colour= survey_m))  + 
+  geom_path(data=ManageAreas.f,colour="dodgerblue3", aes(x=long, y=lat, group=id)) + 
+  geom_polygon(data=world, colour="gray35", fill="gray85", aes(x=long, y=lat, group=survey_m))  + 
+  coord_cartesian(xlim = c(36.58, 39), ylim=c(17.87, 22.5)) +
+  theme_classic() + 
+  geom_point(data=ps, size=2, colour="gray35", aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=ps, label="PZU", size=3,  hjust=1, vjust=-1.2,  aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=MApoints, aes(x=lon, y=lat, group=survey_m, label=area)) +
+  theme(legend.position="none")  + 
+  ggtitle("Survey 2: May 2013")
+
+
+s3.map <- ggplot(subset(catch, survey==2013005), aes(x=lon, y=lat)) + 
+  geom_point(shape="+", size=2, colour= colors[3], aes(group=survey_m, colour= survey_m))  + 
+  geom_path(data=ManageAreas.f,colour="dodgerblue3", aes(x=long, y=lat, group=id)) + 
+  geom_polygon(data=world, colour="gray35", fill="gray85", aes(x=long, y=lat, group=survey_m))  + 
+  coord_cartesian(xlim = c(36.58, 39), ylim=c(17.87, 22.5)) +
+  theme_classic() + 
+  geom_point(data=ps, size=2, colour="gray35", aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=ps, label="PZU", size=3,  hjust=1, vjust=-1.2,  aes(x=x, y=y, group=survey_m)) + 
+  geom_text(data=MApoints, aes(x=lon, y=lat, group=survey_m, label=area)) +
+  theme(legend.position="none") + 
+  ggtitle("Survey 3: Nov. 2013")
+
+s1.map + s2.map +s3.map
+
+
+ggsave("./figs/Fig2_station_map.tiff", width=240, height=160, units="mm", dpi=400)
 ```
 
 
@@ -332,7 +449,9 @@ Number of fish (organized by family and species) caught by Gillnet or Traps for 
 * (new table for revision 2020) *
 ```{r species tabel, echo=FALSE}
 
-species.table <- subset(catch, Sci_name!="NO CATCH" & Sci_name!="No catch" & gear=="TB" | gear =="GN") %>% dplyr::group_by(Fam_name, Sci_name, survey, gear) %>% dplyr::summarise(No.individ=sum(as.integer(number)))
+species.table <- subset(catch, Sci_name!="NO CATCH" & Sci_name!="No catch" & gear=="TB" | gear =="GN") %>% dplyr::group_by(Fam_name, Sci_name, survey, gear) %>% dplyr::summarise(No.individ=sum(as.integer(number), No.gear=n_distinct(ss)))
+
+
 
 species.table <- spread(species.table, gear, No.individ)
 
@@ -352,6 +471,32 @@ spt[,c(9,1:8)]%>%
    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 8)
 
 write.csv2(spt, "./figs/species_catch_table.csv")
+
+
+# similar table for number of traps/gillnets with catches of species
+
+st2 <- subset(catch, Sci_name!="NO CATCH" & Sci_name!="No catch" & gear=="TB" | gear =="GN") %>% dplyr::group_by(Fam_name, Sci_name, survey, gear) %>% dplyr::summarise( No.gear=n_distinct(ss))
+
+st2 <- spread(st2, gear, No.gear)
+
+spt2 <- st2[,2:5] %>%
+  gather(variable, value, -(Sci_name:survey)) %>%
+  unite(temp, survey, variable) %>%
+  spread(temp, value)  %>%
+  replace(is.na(.), 0) %>%
+  rowwise() %>%
+  #mutate(sum = rowSums(.[2:7]))
+  dplyr::mutate(sum = sum(c_across("2012901_GN":"2013005_TB")))
+
+spt2$fam_name <- species.table$Fam_name[match(spt$Sci_name, species.table$Sci_name)] 
+ 
+spt2[,c(9,1:8)]%>%
+  kable(format = "html", escape = F) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 8)
+
+write.csv2(spt2, "./figs/species_catch_table_NoStations.csv")
+
+
 ```
 
 
@@ -384,6 +529,9 @@ dp <- ggplot(subset(c2, gear=="TB" & depth!=0), aes(as.factor(id), depth))
 dp <- dp +  geom_boxplot(scale="width", aes(), draw_quantiles = c(0.5)) + scale_y_reverse() + labs(x="Management areas", y="Trap set depth (m)")  +theme_bw()  +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",      "Survey 2: May 2013" = "May.2013",      "Survey 3: Nov. 2013" = "Nov.2013")))
 
 dp
+
+ggsave("./figs/trap_depth.tiff", width=6, height=6)
+ggsave("./figs/trap_depth.png", width=6, height=6)
 
 #tiff(file="./figs/trap_area_depth.tiff", width=3000, height=1500, res=400, pointsize=10, compression=c("none"))
 #dp
@@ -523,7 +671,7 @@ c3$survey_m <- as.factor(c3$survey_m)
 
 duration.plot <- ggplot(c3, aes(as.factor(id), Fhrs))
 
-duration.plot <-  duration.plot +  geom_boxplot() + stat_summary(fun.y=mean, geom="point", shape=20, size=4, color="red", fill="red") + labs(x="Management areas", y="Hours fishing (traps)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+duration.plot <-  duration.plot +  geom_boxplot() + stat_summary(fun.y=mean, geom="point", shape=20, size=3, color="red", fill="red") + labs(x="Management areas", y="Hours fishing (traps)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
       "Survey 2: May 2013" = "May.2013",
       "Survey 3: Nov. 2013" = "Nov.2013")))
 
@@ -615,9 +763,15 @@ c33 <- subset(catch, gear=="GN") %>%
 c33$survey_m <- as.factor(c33$survey_m)
 
 
-duration.plot.gn <- ggplot(c33, aes(id, Fhrs))
+#duration.plot.gn <- ggplot(c33, aes(id, Fhrs))
 
-duration.plot.gn <-  duration.plot.gn +  geom_point() + stat_summary(fun.y=mean, geom="point", shape=5, size=3, color="red", fill="red") + labs( x="Management areas", y="Hours fishing (gillnets)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+duration.plot.gn <-  duration.plot.gn +  geom_point() + stat_summary(fun.y=mean, geom="point", shape=20, size=3, color="red", fill="red") + labs( x="Management areas", y="Hours fishing (gillnets)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
+      "Survey 2: May 2013" = "May.2013",
+      "Survey 3: Nov. 2013" = "Nov.2013")))
+
+#duration.plot.gn <- ggplot(c33, aes(as.factor(id), Fhrs))
+
+duration.plot.gn <- duration.plot.gn  + geom_boxplot()  + stat_summary(fun.y=mean, geom="point", shape=20, size=3, color="red", fill="red") + labs( x="Management areas", y="Hours fishing (gillnets)")  +theme_bw() +facet_wrap(~survey_m, labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
       "Survey 2: May 2013" = "May.2013",
       "Survey 3: Nov. 2013" = "Nov.2013")))
 
@@ -639,11 +793,9 @@ ca.plot2
 
 
 
-(duration.plot.gn | ca.plot2) + plot_annotation(tag_levels = 'A') & 
-  theme(plot.tag = element_text(size = 10)) 
+#(duration.plot.gn | ca.plot2) + plot_annotation(tag_levels = 'A') & 
+ # theme(plot.tag = element_text(size = 10)) 
 
-ggsave("./figs/Fig4_gillnet duration CPUE combined.png", height = 3, width = 6)
-ggsave("./figs/Fig4_gillnet duration CPUE combined.tiff", height = 3, width = 6)
 ```
 Fishing hours for traps was significantly affected by areas (except area 3 which had a very large variability), however, the number of gillnet sets was very low pr area and survey. 
 
@@ -922,15 +1074,16 @@ Depth was, however, not a significant factor in any of the four models developed
 
 ***
 
-### Combine duration and depth plots of traps in one panels
-Use 'patchwork' package to arrange plots
-```{r trap plots patchwork, echo=FALSE}
+### Combine trap and gillnet duration + CPUE plots
 
-#pw1 <- (dp | duration.plot) / ca.plot + plot_annotation(tag_levels = 'A') &   theme(plot.tag = element_text(size = 10)) +theme_minimal()
-pw1 <- (duration.plot + dp)/  ca.plot + plot_annotation(tag_levels = 'A') &   theme(plot.tag = element_text(size = 10)) +theme_minimal()
-pw1
-ggsave("./figs/Fig3_traps combined panel.png")
-ggsave("./figs/Fig3_traps combined panel.tiff")
+```{r combined trap and gillnet plot, echo=FALSE}
+
+(duration.plot + ca.plot)/(duration.plot.gn | ca.plot2) + plot_annotation(tag_levels = 'A') &   theme(plot.tag = element_text(size = 10)) +theme_minimal()
+
+ggsave("./figs/Fig3_traps_nets_4_panel.png")
+ggsave("./figs/Fig3_traps_nets_4_panel.tiff")
+
+
 ```
 
 
@@ -950,7 +1103,7 @@ c4$FamGroup2 <- as.factor(capwords(tolower(as.character(c4$FamGroup))))
 gear.plot <- c4 %>%  mutate(FamGroup2 = fct_relevel(FamGroup2,  "Other Spp", "Serranidae","Scombridae","Lutjanidae", "Lethrinidae", "Chirocentridae", "Carcharhinidae", "Carangidae",  "Acanthuridae")) %>%
  ggplot( aes(FamGroup2, fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=CPUEw)) +theme_bw() + facet_grid(vars(gear), vars(survey_m), labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
       "Survey 2: May 2013" = "May 2013",
-      "Survey 3: Nov. 2013" = "Nov.2013"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE) 
+      "Survey 3: Nov. 2013" = "Nov.2013"), gear=c("GN" ="Gillnet", "TB" ="Trap"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE) 
 gear.plot
 #ggsave("./figs/gearplot_species.tiff")
 
@@ -958,7 +1111,7 @@ gear.plot
 # by trophic group
 gear.plot2 <- ggplot(c4, aes(TGShort, fill=survey_m)) + geom_bar(binwidt=0.2, aes( weight=CPUEw)) +theme_bw() + facet_grid(vars(gear), vars(survey_m), labeller=labeller(survey_m=c("Survey 1: Nov. 2012" = "Nov.2012",
       "Survey 2: May 2013" = "May 2013",
-      "Survey 3: Nov. 2013" = "Nov.2013"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE)
+      "Survey 3: Nov. 2013" = "Nov.2013"), gear=c("GN" ="Gillnet", "TB" ="Trap"))) + coord_flip() +xlab("") + ylab("kg/hour fishing (cumulative)")  + guides(fill=guide_legend(title="Survey")) + theme(legend.position = "none") + guides(fill=FALSE)
 gear.plot2
 #ggsave("./figs/gearplot_trophic_group.tiff")
 
@@ -983,7 +1136,7 @@ PCA was carried out on average catches (CPUE) per survey and area (needed to cre
 
 # By trophic group 
 # CPUEw
-c5 <- subset(c4, CPUEw>0)[,c(1,28,14,37,22)]
+c5 <- subset(c4, CPUEw>0)[,c(1,17, 31, 25, 40)]
 c5$index <- paste(c5$gear, c5$survey, c5$id, sep="_")
 
 cc5 <- c5[,c(6,4,5)] %>%
@@ -1014,7 +1167,7 @@ percentage <- paste( colnames(df_out), "(", paste( as.character(percentage), "%"
 p<-ggplot(df_out,aes(x=PC1,y=PC2,color=gear, label=area, shape = factor(survey)))
 p<-p +
   geom_point() + 
-  geom_text(size=3,  nudge_x = 0.15) + 
+  #geom_text(size=3,  nudge_x = 0.15) + 
   xlab(percentage[1]) + 
   ylab(percentage[2]) + 
   scale_colour_discrete(name  ="Gear",
@@ -1031,10 +1184,10 @@ df_out_r$Trophic_Group <- row.names(df_out_r)
 
 df_out_r
 
-p2<-ggplot(df_out_r,aes(x=PC1,y=PC2,label=Trophic_Group,color=Trophic_Group ))
-p2<-p2+geom_point() + geom_text(size=3) + 
+p2<-ggplot(df_out_r,aes(x=PC1,y=PC2,label=Trophic_Group ))
+p2<-p2+ geom_text(size=3,position=position_jitter(width=0.1,height=0.1)) +  expand_limits(x = c(-0.12, 1.12), y=c(-1.12, 0.12)) +
   xlab(percentage[1]) + 
-  ylab(percentage[2])+ theme_bw()
+  ylab(percentage[2])+ theme_bw() + theme(legend.position = "none")
 
 pw3 <- p / p2
 pw3
@@ -1045,12 +1198,15 @@ pw3
 
 ##### Combine gearplot and PCA
 ```{r gearplot pca, echo=FALSE}
-pw2 | pw3 
+#pw2 | pw3 
+
+(gear.plot2 +p) / (gear.plot+ p2) + plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 10))
 
 #gear.plot2| pw3 
 
-ggsave("./figs/Fig5_gearplot PCA.tiff", width=8, height=6)
-ggsave("./figs/Fig5_gearplot PCA.png", width=8, height=6)
+ggsave("./figs/Fig4_gearplot PCA.tiff", width=8, height=6)
+ggsave("./figs/Fig4_gearplot PCA.png", width=8, height=6)
 ```
 
 
